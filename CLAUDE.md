@@ -14,23 +14,25 @@ Turborepo monorepo with pnpm workspaces.
 ```
 sport-fan-app/
 ├── apps/
-│   ├── web/        Next.js 14 App Router — fan UI + admin dashboard
-│   └── mobile/     Expo (React Native) — iOS + Android
+│   ├── web/        Next.js 15 App Router — fan UI + admin dashboard
+│   └── mobile/     Expo 52 (React Native 0.76) — iOS + Android
 ├── packages/
 │   ├── types/        @sport-fan/types — DB types + domain enums
 │   ├── shared-logic/ @sport-fan/shared-logic — emotion engine, suggestion engine, utils
 │   └── config/       shared ESLint, Prettier, TSConfig
-└── supabase/
-    ├── migrations/   SQL migration files (applied in numbered order)
-    ├── seed.sql
-    └── functions/    Deno Edge Functions (sports data sync)
+├── supabase/
+│   ├── migrations/   SQL migration files (applied in numbered order)
+│   ├── seed.sql
+│   └── functions/    Deno Edge Functions (sports data sync)
+├── netlify.toml      Netlify deployment config (builds from repo root via turbo)
+└── vercel.json       Vercel deployment config (builds from repo root via turbo)
 ```
 
 ## Tech Stack
 
 | Layer | Technology |
 |---|---|
-| Web frontend | Next.js 14 (App Router), TypeScript, Tailwind CSS, shadcn/ui |
+| Web frontend | Next.js 15 (App Router), TypeScript, Tailwind CSS, shadcn/ui |
 | Mobile frontend | Expo (React Native), TypeScript, NativeWind v4 |
 | Backend / DB | Supabase (Postgres, Auth, Realtime, Edge Functions) |
 | Charts (web) | Recharts |
@@ -116,10 +118,28 @@ Admin role is set via Supabase service role only (`auth.admin.updateUserById`) �
 - `@sport-fan/shared-logic` — pure functions only; no Supabase imports, no React imports, no side effects
 - Emotion type has exactly 12 values; `EMOTION_META` in `shared-logic` must cover all 12
 - Suggestion selection is always random from matching active templates — `pickSuggestion()` in shared-logic
+- Both packages compile to **CommonJS** (`module: "CommonJS"` in tsconfig) — do not change to ESM
+- Both packages must be built (`dist/` exists) before the web or mobile app can compile
+- `@sport-fan/config/tsconfig/*` cannot be used in `extends` — TypeScript cannot resolve workspace package names there; always inline compiler options directly in each package's `tsconfig.json`
+
+## Deployment
+
+### Web (Netlify — preferred) / Vercel
+- Both configs live at repo root (`netlify.toml`, `vercel.json`)
+- **Root Directory must be blank (repo root)** in both Netlify and Vercel dashboards
+- Build command: `pnpm turbo run build --filter=@sport-fan/web...` — turbo builds packages first automatically
+- Publish/output directory: `apps/web/.next`
+- Required env vars: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
+- `next.config.ts` has `typescript.ignoreBuildErrors: true` — Supabase join query types need `supabase gen types --linked` from a live DB to resolve correctly
+
+### Mobile (Expo)
+- `@/` alias is handled by `babel-plugin-module-resolver` (not tsconfig paths — Metro ignores those)
+- Alias maps `@` → `./src` (lib and stores live in `apps/mobile/src/`)
+- Build for stores: `eas build --platform android` / `eas build --platform ios`
 
 ## Coding Conventions
 
-- TypeScript strict mode everywhere
+- TypeScript strict mode everywhere (web uses slightly relaxed: no `exactOptionalPropertyTypes`, no `noUncheckedIndexedAccess` — incompatible with `@supabase/ssr`)
 - No `any` — use `unknown` and narrow
 - Tailwind for all styling (web: standard Tailwind, mobile: NativeWind)
 - Server Actions for all Supabase writes from the web app (never mutate from client components directly)
