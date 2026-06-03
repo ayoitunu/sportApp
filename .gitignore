@@ -1,0 +1,28 @@
+# dependencies
+node_modules/
+.pnpm-store/
+
+# build outputs
+.next/
+dist/
+out/
+
+# Expo
+.expo/
+apps/mobile/android/
+apps/mobile/ios/
+
+# env files
+.env
+.env.local
+.env.*.local
+
+# Supabase
+supabase/.branches/
+supabase/.temp/
+
+# misc
+.DS_Store
+*.pem
+.turbo/
+coverage/

@@ -1,0 +1,43 @@
+{
+  "expo": {
+    "name": "FanPulse",
+    "slug": "fanpulse",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0ea5e9"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.fanpulse.app",
+      "associatedDomains": ["applinks:fanpulse.app"]
+    },
+    "android": {
+      "package": "com.fanpulse.app",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [{ "scheme": "https", "host": "fanpulse.app", "pathPrefix": "/auth" }],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
+    },
+    "scheme": "fanpulse",
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      [
+        "expo-splash-screen",
+        { "image": "./assets/splash.png", "backgroundColor": "#0ea5e9", "imageWidth": 200 }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
