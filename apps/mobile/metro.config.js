@@ -13,5 +13,8 @@ config.resolver.nodeModulesPaths = [
   path.resolve(projectRoot, 'node_modules'),
   path.resolve(workspaceRoot, 'node_modules'),
 ]
+config.resolver.resolverMainFields = ['react-native', 'source', 'browser', 'main']
+config.resolver.unstable_enablePackageExports = true
+config.resolver.disableHierarchicalLookup = false
 
 module.exports = withNativeWind(config, { input: './global.css' })
