@@ -1,0 +1,11 @@
+[build]
+  base = "."
+  command = "pnpm turbo run build --filter=@sport-fan/web..."
+  publish = "apps/web/.next"
+
+[build.environment]
+  NODE_VERSION = "20"
+  PNPM_VERSION = "9.15.9"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
