@@ -9,12 +9,13 @@ export interface SubmitCheckInRequest {
 }
 
 export interface SubmitCheckInResponse {
-  checkInId: string
+  checkInId: string | null
   suggestion: {
     id: string
     text: string
     tone: string | null
   } | null
+  error?: string
 }
 
 export interface UpdateGameResultRequest {

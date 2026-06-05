@@ -26,11 +26,11 @@ export default function PreCheckinPage({ params }: { params: Promise<{ gameId: s
     if (!emotion || !supportedTeamId) return
     setSubmitting(true)
     setError(null)
-    try {
-      const res = await submitCheckIn(gameId, supportedTeamId, 'pre_game', emotion)
+    const res = await submitCheckIn(gameId, supportedTeamId, 'pre_game', emotion)
+    if (res.error) {
+      setError(res.error)
+    } else {
       setResult(res)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong.')
     }
     setSubmitting(false)
   }

@@ -43,11 +43,11 @@ export default function PostCheckinPage({ params }: { params: Promise<{ gameId: 
     if (!emotion || !supportedTeamId) return
     setSubmitting(true)
     setError(null)
-    try {
-      const res = await submitCheckIn(gameId, supportedTeamId, 'post_game', emotion)
+    const res = await submitCheckIn(gameId, supportedTeamId, 'post_game', emotion)
+    if (res.error) {
+      setError(res.error)
+    } else {
       setResult(res)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong.')
     }
     setSubmitting(false)
   }

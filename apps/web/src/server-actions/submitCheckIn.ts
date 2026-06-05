@@ -13,7 +13,7 @@ export async function submitCheckIn(
   const supabase = await createClient()
 
   const { data: { user }, error: authError } = await supabase.auth.getUser()
-  if (authError || !user) throw new Error('Not authenticated')
+  if (authError || !user) return { checkInId: null, suggestion: null, error: 'Not authenticated' }
 
   // Get game outcome for post-game suggestion matching
   let outcome: GameOutcome | null = null
@@ -22,8 +22,8 @@ export async function submitCheckIn(
       .from('games')
       .select('outcome')
       .eq('id', gameId)
-      .single()
-    outcome = game?.outcome ?? null
+      .maybeSingle()
+    outcome = (game as { outcome: GameOutcome | null } | null)?.outcome ?? null
   }
 
   // Find matching suggestion templates
@@ -56,12 +56,19 @@ export async function submitCheckIn(
       suggestion_id: chosen?.id ?? null,
     })
     .select('id')
-    .single()
+    .maybeSingle()
 
-  if (insertError) throw new Error(insertError.message)
+  if (insertError) {
+    // Unique constraint violation = already checked in
+    if (insertError.code === '23505') {
+      return { checkInId: null, suggestion: null, error: 'You have already checked in for this game and phase.' }
+    }
+    return { checkInId: null, suggestion: null, error: insertError.message }
+  }
 
+  const row = checkIn as { id: string } | null
   return {
-    checkInId: checkIn.id,
+    checkInId: row?.id ?? null,
     suggestion: chosen ? { id: chosen.id, text: chosen.text, tone: chosen.tone } : null,
   }
 }
