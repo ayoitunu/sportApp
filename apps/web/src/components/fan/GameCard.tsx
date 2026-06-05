@@ -1,64 +1,114 @@
+'use client'
 import Link from 'next/link'
 import type { Game } from '@sport-fan/types'
 
-interface Props { game: Game }
-
-const STATUS_BADGE: Record<string, string> = {
-  scheduled: 'bg-blue-100 text-blue-700',
-  live:      'bg-red-100 text-red-700',
-  finished:  'bg-gray-100 text-gray-600',
-  cancelled: 'bg-yellow-100 text-yellow-700',
+interface Props {
+  game: Game
+  index?: number
 }
 
-export function GameCard({ game }: Props) {
+export function GameCard({ game, index = 0 }: Props) {
   const date = new Date(game.scheduled_at)
+  const isLive = game.status === 'live'
   const isFinished = game.status === 'finished'
+
+  const delayClass = [
+    'delay-0', 'delay-75', 'delay-150', 'delay-225', 'delay-300', 'delay-375',
+  ][Math.min(index, 5)]
 
   return (
     <Link
       href={`/games/${game.id}`}
-      className="block bg-white rounded-2xl border border-gray-200 p-5 hover:border-brand-300 hover:shadow-sm transition-all"
+      style={{ opacity: 0 }}
+      className={`group block rounded-2xl border border-pitch-700 bg-pitch-900 hover:border-live-500/60 hover:bg-pitch-800 transition-all duration-200 overflow-hidden animate-card-reveal ${delayClass}`}
     >
-      <div className="flex items-center justify-between mb-4">
-        <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${STATUS_BADGE[game.status] ?? ''}`}>
-          {game.status === 'live' ? '🔴 LIVE' : game.status.charAt(0).toUpperCase() + game.status.slice(1)}
-        </span>
-        <span className="text-xs text-gray-400">
+      {/* Top strip — status + date */}
+      <div className="flex items-center justify-between px-5 pt-4 pb-0">
+        <StatusBadge status={game.status} isLive={isLive} />
+        <span className="text-xs text-gray-500 tabular-nums">
           {date.toLocaleDateString('en-GB', { weekday: 'short', month: 'short', day: 'numeric' })}
           {' · '}
           {date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
         </span>
       </div>
 
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex-1 text-center">
-          <p className="font-bold text-gray-900 text-lg leading-tight">{game.home_team.name}</p>
+      {/* Teams + score row */}
+      <div className="flex items-center justify-between gap-3 px-5 py-4">
+        {/* Home team */}
+        <div className="flex-1 min-w-0">
+          <p className="font-display text-2xl font-bold uppercase tracking-tight text-white leading-none truncate">
+            {game.home_team.name}
+          </p>
           {game.home_team.short_name && (
-            <p className="text-xs text-gray-400">{game.home_team.short_name}</p>
+            <p className="text-xs text-gray-500 mt-0.5">{game.home_team.short_name}</p>
           )}
         </div>
 
-        <div className="text-center min-w-[60px]">
+        {/* Score / vs */}
+        <div className="text-center flex-shrink-0 px-2">
           {isFinished && game.home_score !== null && game.away_score !== null ? (
-            <p className="text-2xl font-black text-gray-900">
-              {game.home_score} – {game.away_score}
+            <p className="font-display text-3xl font-bold text-white tabular-nums">
+              {game.home_score}<span className="text-gray-500 mx-1">–</span>{game.away_score}
             </p>
+          ) : isLive ? (
+            <p className="font-display text-xl font-bold text-live-500 tracking-widest animate-pulse">LIVE</p>
           ) : (
-            <p className="text-sm font-semibold text-gray-400">vs</p>
+            <p className="font-display text-lg font-semibold text-gray-600">VS</p>
           )}
         </div>
 
-        <div className="flex-1 text-center">
-          <p className="font-bold text-gray-900 text-lg leading-tight">{game.away_team.name}</p>
+        {/* Away team */}
+        <div className="flex-1 min-w-0 text-right">
+          <p className="font-display text-2xl font-bold uppercase tracking-tight text-white leading-none truncate">
+            {game.away_team.name}
+          </p>
           {game.away_team.short_name && (
-            <p className="text-xs text-gray-400">{game.away_team.short_name}</p>
+            <p className="text-xs text-gray-500 mt-0.5">{game.away_team.short_name}</p>
           )}
         </div>
       </div>
 
+      {/* Venue */}
       {game.venue && (
-        <p className="mt-3 text-center text-xs text-gray-400">{game.venue}</p>
+        <div className="px-5 pb-3 -mt-1">
+          <p className="text-xs text-gray-600 text-center">{game.venue}</p>
+        </div>
       )}
+
+      {/* Bottom amber accent line — appears on hover */}
+      <div className="h-0.5 w-0 group-hover:w-full bg-live-500 transition-all duration-300" />
     </Link>
+  )
+}
+
+function StatusBadge({ status, isLive }: { status: string; isLive: boolean }) {
+  if (isLive) {
+    return (
+      <span className="relative inline-flex items-center gap-1.5 text-xs font-bold text-live-500 uppercase tracking-wide">
+        <span className="relative flex h-2 w-2">
+          <span className="animate-pulse-ring absolute inline-flex h-full w-full rounded-full bg-live-500 opacity-75" />
+          <span className="relative inline-flex rounded-full h-2 w-2 bg-live-500" />
+        </span>
+        Live
+      </span>
+    )
+  }
+
+  const styles: Record<string, string> = {
+    scheduled: 'text-sky-400',
+    finished:  'text-gray-500',
+    cancelled: 'text-yellow-500',
+  }
+
+  const labels: Record<string, string> = {
+    scheduled: 'Upcoming',
+    finished:  'Full Time',
+    cancelled: 'Cancelled',
+  }
+
+  return (
+    <span className={`text-xs font-semibold uppercase tracking-wide ${styles[status] ?? 'text-gray-400'}`}>
+      {labels[status] ?? status}
+    </span>
   )
 }

@@ -1,21 +1,37 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { EMOTION_META } from '@sport-fan/shared-logic'
+import { SuggestionToggle } from '@/components/admin/SuggestionToggle'
 import type { EmotionType } from '@sport-fan/types'
+
+type Template = {
+  id: string
+  phase: string
+  emotion: string
+  outcome: string | null
+  text: string
+  tone: string | null
+  is_active: boolean
+}
 
 export default async function AdminSuggestionsPage() {
   const supabase = await createClient()
-  const { data: templates } = await supabase
+  const { data: rawTemplates } = await supabase
     .from('suggestion_templates')
     .select('*')
     .order('phase')
     .order('emotion')
 
+  const templates = (rawTemplates ?? []) as Template[]
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">Suggestion Templates</h1>
-        <Link href="/admin/suggestions/new" className="px-4 py-2 rounded-lg bg-brand-600 text-white text-sm font-medium hover:bg-brand-700 transition-colors">
+        <Link
+          href="/admin/suggestions/new"
+          className="px-4 py-2 rounded-lg bg-brand-600 text-white text-sm font-medium hover:bg-brand-700 transition-colors"
+        >
           + New template
         </Link>
       </div>
@@ -33,7 +49,7 @@ export default async function AdminSuggestionsPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
-            {(templates ?? []).map((t) => {
+            {templates.map((t) => {
               const meta = EMOTION_META[t.emotion as EmotionType]
               return (
                 <tr key={t.id} className="hover:bg-gray-50">
@@ -53,9 +69,7 @@ export default async function AdminSuggestionsPage() {
                     <p className="line-clamp-2">{t.text}</p>
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`text-xs font-medium ${t.is_active ? 'text-green-600' : 'text-gray-400'}`}>
-                      {t.is_active ? 'Yes' : 'No'}
-                    </span>
+                    <SuggestionToggle id={t.id} isActive={t.is_active} />
                   </td>
                   <td className="px-4 py-3 text-right">
                     <Link href={`/admin/suggestions/${t.id}`} className="text-xs text-brand-600 hover:underline">
@@ -67,6 +81,9 @@ export default async function AdminSuggestionsPage() {
             })}
           </tbody>
         </table>
+        {templates.length === 0 && (
+          <p className="p-6 text-center text-sm text-gray-400">No templates yet. Create your first one.</p>
+        )}
       </div>
     </div>
   )

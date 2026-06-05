@@ -9,6 +9,22 @@
   }
 
   body {
-    @apply bg-white text-gray-900 antialiased;
+    @apply bg-white text-gray-900 antialiased font-body;
   }
+
+  /* Display font utility — used for team names, scores, headings */
+  .font-display {
+    font-family: var(--font-display), Impact, sans-serif;
+    letter-spacing: -0.01em;
+  }
+}
+
+@layer utilities {
+  /* Staggered card reveal helpers */
+  .delay-0   { animation-delay: 0ms; }
+  .delay-75  { animation-delay: 75ms; }
+  .delay-150 { animation-delay: 150ms; }
+  .delay-225 { animation-delay: 225ms; }
+  .delay-300 { animation-delay: 300ms; }
+  .delay-375 { animation-delay: 375ms; }
 }

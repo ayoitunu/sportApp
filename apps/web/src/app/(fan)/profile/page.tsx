@@ -12,7 +12,7 @@ export default async function ProfilePage() {
 
   return (
     <div className="space-y-6 max-w-md">
-      <h1 className="text-2xl font-bold text-gray-900">Profile</h1>
+      <h1 className="font-display text-4xl font-bold uppercase tracking-tight text-white">Profile</h1>
       <ProfileForm
         initialProfile={profile}
         userEmail={user.email ?? ''}
