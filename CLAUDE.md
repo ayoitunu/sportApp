@@ -31,7 +31,7 @@ sport-fan-app/
 │   ├── seed.sql
 │   └── functions/    Deno Edge Functions (sports data sync)
 ├── netlify.toml      Netlify deployment config (builds from repo root via turbo)
-└── vercel.json       Vercel deployment config (builds from repo root via turbo)
+└── vercel.json       Vercel deployment config (not in use — Netlify is the active deployment platform)
 ```
 
 ## Shared Commands
@@ -92,6 +92,34 @@ supabase functions invoke sync-football-fixtures
 API_FOOTBALL_KEY     # api-football.com — soccer fixtures
 BALLDONTLIE_KEY      # balldontlie.io — basketball fixtures
 ```
+
+## Deployment
+
+**Active platform: Netlify** (`sport-fan-app.netlify.app`)  
+Vercel is no longer in use.
+
+- Build command: `pnpm turbo run build --filter=@sport-fan/web...`
+- Publish directory: `apps/web/.next`
+- Production branch: `main`
+- Plugin: `@netlify/plugin-nextjs`
+
+**Deploy workflow:**
+```bash
+# Work on web branch
+git checkout web
+# ... make changes, commit ...
+git push origin web
+
+# Merge to main to trigger Netlify deploy
+git checkout main && git merge web && git push origin main && git checkout web
+```
+
+**Stable version tag:** `stable-version1` = commit `0657a77` (deployed 2026-06-05)  
+To revert: `git checkout main && git reset --hard stable-version1 && git push --force origin main`
+
+## Seeding Production Data
+
+Run `supabase/seed.sql` in the Supabase dashboard SQL Editor to populate sports, teams, and sample games. The seed uses `date_trunc('week', now())` so sample games always land in the current week.
 
 ## External Sports Data
 
