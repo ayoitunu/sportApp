@@ -1,6 +1,5 @@
 {
   "framework": "nextjs",
   "buildCommand": "pnpm turbo run build --filter=@sport-fan/web...",
-  "installCommand": "pnpm install",
-  "ignoreCommand": "git diff --quiet HEAD^ HEAD -- apps/web/ packages/ supabase/"
+  "installCommand": "pnpm install"
 }
