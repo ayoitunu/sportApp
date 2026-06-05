@@ -70,8 +70,9 @@ SUPABASE_SERVICE_ROLE_KEY=        # server-only, never expose to client
 ## Deployment (Netlify — preferred / Vercel)
 
 - Both configs live at repo root (`netlify.toml`, `vercel.json`)
-- **Root Directory must be blank (repo root)** in both Netlify and Vercel dashboards
-- Build command: `pnpm turbo run build --filter=@sport-fan/web...` — turbo builds packages first automatically
+- **Root Directory must be blank (repo root)** in both Netlify and Vercel dashboards — the build *must* start from root so turbo can reach `packages/` before building the web app
+- Build command: `pnpm turbo run build --filter=@sport-fan/web...` — turbo builds shared packages first automatically
 - Publish/output directory: `apps/web/.next`
 - Required env vars: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
 - `next.config.ts` has `typescript.ignoreBuildErrors: true` — Supabase join query types need `supabase gen types --linked` from a live DB to resolve correctly
+- **Ignore rules** skip the build automatically when only `apps/mobile/` or unrelated files change — deploys only trigger on changes to `apps/web/`, `packages/`, or `supabase/`
