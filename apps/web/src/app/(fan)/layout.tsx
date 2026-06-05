@@ -4,20 +4,19 @@ import { redirect } from 'next/navigation'
 
 export default async function FanLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
+
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (authError || !user) redirect('/login')
 
   const { data: profileData } = await supabase
     .from('profiles')
     .select('sport_pref, display_name')
-    .eq('id', user.id)
-    .single()
+    .eq('id', user!.id)
+    .maybeSingle()
 
   const profile = profileData as { sport_pref: string | null; display_name: string | null } | null
 
-  if (!profile?.sport_pref) redirect('/onboarding')
-
-  const safeProfile = profile as { sport_pref: string; display_name: string | null }
+  if (!profile || !profile.sport_pref) redirect('/onboarding')
 
   return (
     <div className="min-h-screen bg-pitch-950">
@@ -35,7 +34,7 @@ export default async function FanLayout({ children }: { children: React.ReactNod
             <NavLink href="/games">Games</NavLink>
             <NavLink href="/history">History</NavLink>
             <NavLink href="/profile">
-              {safeProfile.display_name ?? 'Profile'}
+              {profile.display_name ?? 'Profile'}
             </NavLink>
           </div>
         </div>
